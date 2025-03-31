@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+  model Customer {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String      @unique
+  password  String
+  phone     String
+  address   String
+  CreateAt    DateTime     @default(now())
+  UpdateAt    DateTime     @updatedAt @db.Timestamptz(3)
+}
+
+  model Product {
+  id       Int       @id @default(autoincrement())
+  name      String
+  description   String
+  price     Float
+  quantity  Int
+  CreateAt    DateTime     @default(now())
+  UpdateAt    DateTime     @updatedAt @db.Timestamptz(3)
+}
+
+  model Category {
+  id        Int      @id @default(autoincrement())
+  name      String
+  CreateAt    DateTime     @default(now())
+  UpdateAt    DateTime     @updatedAt @db.Timestamptz(3)
+  expense Expense[]
+ 
+}
+
+
+ model Expense {
+   id        Int      @id @default(autoincrement())
+   amount  	Category	@relation(fields: [categoryId], references: [id])		
+   description   String
+   date      String      @unique 
+   CreateAt    DateTime     @default(now())
+   UpdateAt    DateTime     @updatedAt @db.Timestamptz(3)
+   tags      ExpenseTag []      @relation("ExpenseTag") 
+   CategoryId Int
+  
+ }
+
+
+  model Tag {
+   id        Int      @id @default(autoincrement())
+   name      String
+   CreateAt    DateTime     @default(now())
+   UpdateAt    DateTime     @updatedAt @db.Timestamptz(3)
+   expenses  ExpenseTag[]    @relation("ExpenseTag")
+
+ }
+
+
+
+// This is a many-to-many relationship table for Expense and Tag
+   model ExpenseTag {
+   expenseId String
+   tagId     String
+   expense    Expense @relation("ExpenseTag", fields: [expenseId], references: [id])
+   tag        Tag    @relation("ExpenseTag", fields: [tagId], references: [id])    
+   @@id([expenseId, tagId]) // Prevent duplicate assignments
+ }
+
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  userroles  UserRoleAssignment[] @relation("UserUserRole")
+}
+
+model UserRole {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  users     UserRoleAssignment[] @relation("UserUserRole")
+}
+
+model UserRoleAssignment {
+  userId    String
+  roleId    String
+  user      User     @relation("UserUserRole",fields: [userId], references: [id])
+  role      UserRole @relation("UserUserRole",fields: [roleId], references: [id])
+  @@id([userId, roleId]) // Prevent duplicate assignments
+}
+
+enum RoleType {
+  CUSTOMER
+  ADMIN
+}
+
+
+
+
+
+
+
+
